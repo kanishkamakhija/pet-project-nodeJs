@@ -1,8 +1,8 @@
 
 
-const getUserDetails = (db, userName) => {
+const getUserDetails = (userName) => {
     return new Promise((resolve, reject) => {
-        db.collection('user').find({ 'username': userName }).toArray((err, docs) => {
+        db.collection('test').find({ 'username': userName }).toArray((err, docs) => {
             if(docs && docs.length>0){
                 resolve(docs[0]);
             }else{
