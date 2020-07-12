@@ -8,10 +8,10 @@ let cookieParser = require('cookie-parser');
 let logger = require('morgan');
 let bodyParser = require('body-parser');
 let indexRouter = require('./routes/index');
-let usersRouter = require('./routes/users');
 let task = require('./routes/taskRouter');
+let register = require('./routes/register');
+let signIn = require('./routes/signIn');
 let app = express();
-const cors = require("cors");
 
 let {clientApiKeyValidation, isNewSessionRequired, isAuthrequired, generateJWTtoken, verifyToken} = require('./common/authUtils');
 
@@ -23,11 +23,19 @@ app.use(logger('dev'));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-var corsOptions = {
-  origin: "http://localhost:8081"
-};
+app.use(function(req, res, next) {
+  if (req.headers && req.headers.authorization && req.headers.authorization.split(' ')[0] === 'JWT') {
+    jsonwebtoken.verify(req.headers.authorization.split(' ')[1], 'RESTFULAPIs', function(err, decode) {
+      if (err) req.user = undefined;
+      req.user = decode;
+      next();
+    });
+  } else {
+    req.user = undefined;
+    next();
+  }
+});
 
-app.use(cors(corsOptions));
 // app.use('/', indexRouter);
 app.get('/', (req, res, next) => {
   res.status(200).send({
@@ -36,8 +44,10 @@ app.get('/', (req, res, next) => {
   })
 });
 // app.use('/users', usersRouter);
-
+app.use(register);
+app.use(signIn);
 app.use(task);
+
 
 // app.use(clientApiKeyValidation);
 // app.use(async(req, res, next) => {
