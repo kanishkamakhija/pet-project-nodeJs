@@ -14,14 +14,29 @@ router.post('/task', async (req, res, next) => {
     
 });
 
-router.get('/task', async (req, res, next) => {
+router.get('/task/:id', async (req, res, next) => {
     if (req.user) {
-        let tasks = await Task.find({username : req.user.fullName});
-        res.status(200).send({message : "Task Fetched", data: tasks});
+      let task = await Task.find({_id : req.params.id, username: req.user.fullName})
+      if(task.length > 0){
+        // let tasks = await Task.find({username : req.user.fullName}); 
+        res.status(200).send({message : "Task Fetched", data: task});
+      } else {
+        res.status(401).send({message : 'You don\'t have acces to task for this id!!'});
+      }
     } else {
-        res.status(401).send({message : 'Unauthorized user!!'});
+          res.status(401).send({message : 'Unauthorized user!!'});
       }
     
+});
+
+router.get('/task', async (req, res, next) => {
+  if (req.user) {
+      let tasks = await Task.find({username : req.user.fullName});
+      res.status(200).send({message : "All Tasks Fetched", data: tasks});
+  } else {
+        res.status(401).send({message : 'Unauthorized user!!'});
+    }
+  
 });
 
 module.exports = router;
